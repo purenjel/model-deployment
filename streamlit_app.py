@@ -15,7 +15,7 @@ def load_model():
 
 # Prediction function
 def predict_booking_status(input_data, model, encoder_dict):
-    # Check if input data contains valid categories and transform
+    # Encoding categorical columns using the loaded label encoders
     try:
         input_data['type_of_meal_plan'] = encoder_dict['type_of_meal_plan'].transform([input_data['type_of_meal_plan']])
     except ValueError:
@@ -45,6 +45,11 @@ def main():
     # Upload model and encoder
     model, encoder_dict = load_model()
 
+    # Define valid options from label encoder
+    valid_meal_plans = encoder_dict['type_of_meal_plan'].classes_
+    valid_room_types = encoder_dict['room_type_reserved'].classes_
+    valid_market_segments = encoder_dict['market_segment_type'].classes_
+
     # Input form for user to enter data
     st.header('Enter booking details')
 
@@ -54,10 +59,10 @@ def main():
     no_of_weekend_nights = st.number_input('Number of Weekend Nights', min_value=0, max_value=7, value=0)
     no_of_week_nights = st.number_input('Number of Week Nights', min_value=0, max_value=7, value=0)
     
-    type_of_meal_plan = st.selectbox('Meal Plan', ['Meal Plan 1', 'Meal Plan 2', 'Meal Plan 3', 'Not Selected'])
+    type_of_meal_plan = st.selectbox('Meal Plan', valid_meal_plans)
     required_car_parking_space = st.selectbox('Required Car Parking Space', ['Yes', 'No'])
-    room_type_reserved = st.selectbox('Room Type Reserved', ['Room_Type 1', 'Room_Type 2', 'Room_Type 3', 'Room_Type 4', 'Room_Type 5', 'Room_Type 6', 'Room_Type 7'])
-    market_segment_type = st.selectbox('Market Segment Type', ['Online', 'Offline', 'Corporate', 'Complementary', 'Aviation'])
+    room_type_reserved = st.selectbox('Room Type Reserved', valid_room_types)
+    market_segment_type = st.selectbox('Market Segment Type', valid_market_segments)
 
     # Prepare the input data for prediction
     input_data = pd.DataFrame({
