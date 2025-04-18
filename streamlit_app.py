@@ -15,10 +15,24 @@ def load_model():
 
 # Prediction function
 def predict_booking_status(input_data, model, encoder_dict):
-    # Encoding categorical columns using the loaded label encoders
-    input_data['type_of_meal_plan'] = encoder_dict['type_of_meal_plan'].transform([input_data['type_of_meal_plan']])
-    input_data['room_type_reserved'] = encoder_dict['room_type_reserved'].transform([input_data['room_type_reserved']])
-    input_data['market_segment_type'] = encoder_dict['market_segment_type'].transform([input_data['market_segment_type']])
+    # Check if input data contains valid categories and transform
+    try:
+        input_data['type_of_meal_plan'] = encoder_dict['type_of_meal_plan'].transform([input_data['type_of_meal_plan']])
+    except ValueError:
+        st.error("Invalid value for type_of_meal_plan. Please choose from the available options.")
+        return None
+        
+    try:
+        input_data['room_type_reserved'] = encoder_dict['room_type_reserved'].transform([input_data['room_type_reserved']])
+    except ValueError:
+        st.error("Invalid value for room_type_reserved. Please choose from the available options.")
+        return None
+    
+    try:
+        input_data['market_segment_type'] = encoder_dict['market_segment_type'].transform([input_data['market_segment_type']])
+    except ValueError:
+        st.error("Invalid value for market_segment_type. Please choose from the available options.")
+        return None
 
     # Predict using the model
     prediction = model.predict(input_data)
@@ -59,8 +73,9 @@ def main():
 
     if st.button('Predict Booking Status'):
         prediction = predict_booking_status(input_data, model, encoder_dict)
-        status = 'Canceled' if prediction == 1 else 'Not Canceled'
-        st.write(f"The booking status is: {status}")
+        if prediction is not None:
+            status = 'Canceled' if prediction == 1 else 'Not Canceled'
+            st.write(f"The booking status is: {status}")
 
 # Running the application
 if __name__ == "__main__":
