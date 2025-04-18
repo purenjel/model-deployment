@@ -59,7 +59,7 @@ def main():
     no_of_weekend_nights = st.number_input('Number of Weekend Nights', min_value=0, max_value=7, value=0)
     no_of_week_nights = st.number_input('Number of Week Nights', min_value=0, max_value=7, value=0)
     
-    # Display only valid meal plans
+    # Use only valid options for Meal Plan, Room Type, and Market Segment
     type_of_meal_plan = st.selectbox('Meal Plan', valid_meal_plans)
     required_car_parking_space = st.selectbox('Required Car Parking Space', ['Yes', 'No'])
     room_type_reserved = st.selectbox('Room Type Reserved', valid_room_types)
