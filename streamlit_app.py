@@ -6,15 +6,16 @@ from sklearn.preprocessing import LabelEncoder
 from xgboost import XGBClassifier
 
 # Load the saved model and label encoder
-with open('best_xgboost_model.pkl', 'rb') as model_file:
-    model = pickle.load(model_file)
+def load_model():
+    with open('best_xgboost_model.pkl', 'rb') as model_file:
+        model = pickle.load(model_file)
+    with open('label_encoders.pkl', 'rb') as encoders_file:
+        encoder_dict = pickle.load(encoders_file)
+    return model, encoder_dict
 
-with open('label_encoders.pkl', 'rb') as encoders_file:
-    encoder_dict = pickle.load(encoders_file)
-
-# Define the inference function
-def predict_booking_status(input_data):
-    # Encode categorical features
+# Prediction function
+def predict_booking_status(input_data, model, encoder_dict):
+    # Encoding categorical columns using the loaded label encoders
     input_data['type_of_meal_plan'] = encoder_dict['type_of_meal_plan'].transform([input_data['type_of_meal_plan']])
     input_data['room_type_reserved'] = encoder_dict['room_type_reserved'].transform([input_data['room_type_reserved']])
     input_data['market_segment_type'] = encoder_dict['market_segment_type'].transform([input_data['market_segment_type']])
@@ -25,8 +26,11 @@ def predict_booking_status(input_data):
 
 # Streamlit interface
 def main():
-    st.title('Hotel Booking Status Prediction')
+    st.title('Hotel Booking Cancellation Prediction')
     
+    # Upload model and encoder
+    model, encoder_dict = load_model()
+
     # Input form for user to enter data
     st.header('Enter booking details')
 
@@ -54,7 +58,7 @@ def main():
     })
 
     if st.button('Predict Booking Status'):
-        prediction = predict_booking_status(input_data)
+        prediction = predict_booking_status(input_data, model, encoder_dict)
         status = 'Canceled' if prediction == 1 else 'Not Canceled'
         st.write(f"The booking status is: {status}")
 
