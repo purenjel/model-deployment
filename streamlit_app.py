@@ -3,13 +3,12 @@ import streamlit as st
 import numpy as np
 import pickle
 
-# Load the saved components:
+# Load the saved model and encoder separately
 with open("best_xgboost_model.pkl", "rb") as f:
-    components = pickle.load(f)
+    model = pickle.load(f)
 
-# Extract the individual components (imputer, encoder, model):
-encoder = components["encoder"]
-model = components["models"]
+with open("label_encoders.pkl", "rb") as f:
+    encoder = pickle.load(f)
 
 # App layout and title
 st.image("https://www.hoteldel.com/wp-content/uploads/2021/01/hotel-del-coronado-views-suite-K1TOS1-K1TOJ1-1600x900-1.jpg")  # Replace with an appropriate image for the hotel app
