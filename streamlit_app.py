@@ -35,10 +35,17 @@ class HotelBookingPreprocessor:
 
     def encode_labels(self):
         """Encode categorical features using the existing encoders."""
-        # Handle unseen categories by using the existing encoders
-        self.df['type_of_meal_plan'] = self.meal_plan_encoder.transform(self.df['type_of_meal_plan'])
-        self.df['room_type_reserved'] = self.room_type_encoder.transform(self.df['room_type_reserved'])
-        self.df['market_segment_type'] = self.market_segment_encoder.transform(self.df['market_segment_type'])
+        self.df['type_of_meal_plan'] = self.safe_transform(self.meal_plan_encoder, self.df['type_of_meal_plan'])
+        self.df['room_type_reserved'] = self.safe_transform(self.room_type_encoder, self.df['room_type_reserved'])
+        self.df['market_segment_type'] = self.safe_transform(self.market_segment_encoder, self.df['market_segment_type'])
+
+    def safe_transform(self, encoder, column):
+        """Handle unseen categories gracefully."""
+        try:
+            return encoder.transform(column)
+        except ValueError:
+            # If a new category is encountered, map it to a default value
+            return encoder.transform([encoder.classes_[0]] * len(column))
 
     def split_data(self):
         """Split the data into features (X) and target (y), but only return X for inference."""
@@ -51,6 +58,7 @@ class HotelBookingPreprocessor:
         self.encode_labels()
         X = self.split_data()  # Only return features for inference, no target (y)
         return X
+
 
 # Streamlit app layout and functionality
 st.title("Hotel Booking Cancellation Prediction")
