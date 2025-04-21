@@ -13,14 +13,19 @@ with open("best_xgboost_model.pkl", "rb") as f:
 with open("label_encoders.pkl", "rb") as f:
     encoders = pickle.load(f)
 
+# Extract the individual encoders from the loaded dictionary
+meal_plan_encoder = encoders['type_of_meal_plan']
+room_type_encoder = encoders['room_type_reserved']
+market_segment_encoder = encoders['market_segment_type']
+
 # Preprocessing class
 class HotelBookingPreprocessor:
-    def __init__(self, df, encoders=None):
+    def __init__(self, df, meal_plan_encoder, room_type_encoder, market_segment_encoder):
         self.df = df
         # Use the encoders passed as arguments (which were used during training)
-        self.meal_plan_encoder = encoders['type_of_meal_plan']
-        self.room_type_encoder = encoders['room_type_reserved']
-        self.market_segment_encoder = encoders['market_segment_type']
+        self.meal_plan_encoder = meal_plan_encoder
+        self.room_type_encoder = room_type_encoder
+        self.market_segment_encoder = market_segment_encoder
 
     def fill_missing_values(self):
         """Fill missing values in the dataframe."""
@@ -105,7 +110,7 @@ if st.button("Predict Cancellation"):
     input_df = pd.DataFrame([input_data])
 
     # Pass the encoders to the preprocessor
-    preprocessor = HotelBookingPreprocessor(input_df, encoders=encoders)
+    preprocessor = HotelBookingPreprocessor(input_df, meal_plan_encoder, room_type_encoder, market_segment_encoder)
     X_input = preprocessor.preprocess()  # Get features after preprocessing
 
     # Make prediction using the trained XGBoost model
