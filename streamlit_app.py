@@ -3,7 +3,6 @@ import streamlit as st
 import pickle
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
-from sklearn.metrics import accuracy_score, classification_report
 from xgboost import XGBClassifier
 
 # Load the saved model and encoders separately
@@ -36,6 +35,7 @@ class HotelBookingPreprocessor:
 
     def encode_labels(self):
         """Encode categorical features using the existing encoders."""
+        # Handle unseen categories by using the existing encoders
         self.df['type_of_meal_plan'] = self.meal_plan_encoder.transform(self.df['type_of_meal_plan'])
         self.df['room_type_reserved'] = self.room_type_encoder.transform(self.df['room_type_reserved'])
         self.df['market_segment_type'] = self.market_segment_encoder.transform(self.df['market_segment_type'])
