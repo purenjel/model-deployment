@@ -45,16 +45,16 @@ with col1:
     input_data['no_of_children'] = st.slider("Number of Children", 0, 5)
     input_data['no_of_weekend_nights'] = st.slider("Number of Weekend Nights", 0, 7)
     input_data['no_of_week_nights'] = st.slider("Number of Week Nights", 0, 7)
-    input_data['type_of_meal_plan'] = st.selectbox("Meal Plan", ['Room Only', 'BB', 'HB', 'FB'])  # Example meal plans
+    input_data['type_of_meal_plan'] = st.selectbox("Meal Plan", ['Not Selected', 'Meal Plan 1', 'Meal Plan 2', 'Meal Plan 3'])  # Example meal plans
     input_data['required_car_parking_space'] = st.selectbox("Car Parking", [0, 1])  # 0: No, 1: Yes
 
 with col2:
     input_data['room_type_reserved'] = st.selectbox("Room Type", ['Room Type 1', 'Room Type 2', 'Room Type 3'])  # Example room types
     input_data['lead_time'] = st.number_input("Lead Time (days)", 0, 365)
-    input_data['arrival_year']: st.selectbox('Arrival Year', [2017, 2018])
-    input_data['arrival_month'] = st.number_input("Arrival Month", 1, 12)
-    input_data['arrival_date'] = st.number_input("Arrival Date", 1, 31)
-    input_data['market_segment_type'] = st.selectbox("Market Segment", ['Direct', 'Corporate', 'Online TA', 'Offline TA/TO'])  # Example market segments
+    input_data['arrival_year']: st.selectbox("Arrival Year", [2017, 2018])
+    input_data['arrival_month'] = st.selectbox("Arrival Month", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
+    input_data['arrival_date'] = st.slider("Arrival Date", 1, 31)
+    input_data['market_segment_type'] = st.selectbox("Market Segment", ['Online', 'Offline', 'Corporate', 'Complementary', 'Aviation'])  # Example market segments
 
 with col3:
     input_data['repeated_guest'] = st.selectbox("Repeated Guest", [0, 1])  # 0: No, 1: Yes
