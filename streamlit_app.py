@@ -34,20 +34,20 @@ class HotelBookingPreprocessor:
         self.df['type_of_meal_plan'] = self.meal_plan_encoder.fit_transform(self.df['type_of_meal_plan'])
         self.df['room_type_reserved'] = self.room_type_encoder.fit_transform(self.df['room_type_reserved'])
         self.df['market_segment_type'] = self.market_segment_encoder.fit_transform(self.df['market_segment_type'])
-        self.df['booking_status'] = self.df['booking_status'].map({'Not_Canceled': 0, 'Canceled': 1})
 
     def split_data(self):
         """Split the data into features (X) and target (y), then into training and test sets."""
-        X = self.df.drop(columns=['booking_status', 'Booking_ID'])
-        y = self.df['booking_status']
-        return X, y
+        # No need for 'booking_status' in the inference phase (it's the target variable during training)
+        X = self.df.drop(columns=['Booking_ID'])  # Don't include 'booking_status' for inference
+        return X
 
     def preprocess(self):
         """Execute the full preprocessing pipeline."""
         self.fill_missing_values()
         self.encode_labels()
-        X, y = self.split_data()
-        return X, y
+        X = self.split_data()  # No target variable here, just the features
+        return X
+
 
 # Streamlit app layout and functionality
 st.title("Hotel Booking Cancellation Prediction")
