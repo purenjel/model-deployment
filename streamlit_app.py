@@ -10,12 +10,12 @@ with open("best_xgboost_model.pkl", "rb") as f:
 with open("label_encoders.pkl", "rb") as f:
     encoders = pickle.load(f)
 
-# Function to handle unseen labels by mapping them to a default value
+# Function to safely handle unseen labels by mapping them to a default value
 def handle_unseen_label(encoder, value, default_value):
     if value in encoder.classes_:
-        return value
+        return encoder.transform([value])[0]
     else:
-        return default_value
+        return encoder.transform([default_value])[0]  # Map to a default value
 
 # App layout and title
 st.image("https://www.hoteldel.com/wp-content/uploads/2021/01/hotel-del-coronado-views-suite-K1TOS1-K1TOJ1-1600x900-1.jpg")  # Replace with an appropriate image for the hotel app
@@ -85,11 +85,6 @@ if st.button("Predict Cancellation"):
         # Convert 'Yes' and 'No' to 1 and 0 for 'required_car_parking_space' and 'repeated_guest'
         input_df['required_car_parking_space'] = input_df['required_car_parking_space'].map({'No': 0, 'Yes': 1})
         input_df['repeated_guest'] = input_df['repeated_guest'].map({'No': 0, 'Yes': 1})
-        
-        # Transform categorical features using the encoder
-        input_df['type_of_meal_plan'] = encoders['type_of_meal_plan'].transform([input_df['type_of_meal_plan'][0]])[0]
-        input_df['room_type_reserved'] = encoders['room_type_reserved'].transform([input_df['room_type_reserved'][0]])[0]
-        input_df['market_segment_type'] = encoders['market_segment_type'].transform([input_df['market_segment_type'][0]])[0]
         
     except KeyError as e:
         st.error(f"Error during encoding: {e}")
