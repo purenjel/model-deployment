@@ -57,32 +57,12 @@ st.title("Hotel Booking Cancellation Prediction")
 st.image("https://www.hoteldel.com/wp-content/uploads/2021/01/hotel-del-coronado-views-suite-K1TOS1-K1TOJ1-1600x900-1.jpg")
 st.caption("This app predicts whether a hotel booking will be canceled based on guest booking details.")
 
-# Sidebar for input fields
-st.sidebar.header("Required Input Fields")
-st.sidebar.markdown("**Number of Adults**: The number of adults in the booking.")
-st.sidebar.markdown("**Number of Children**: The number of children in the booking.")
-st.sidebar.markdown("**Weekend Nights**: The number of nights booked for weekends.")
-st.sidebar.markdown("**Week Nights**: The number of week nights booked.")
-st.sidebar.markdown("**Meal Plan**: The meal plan chosen (e.g., Room Only, Half Board, etc.).")
-st.sidebar.markdown("**Car Parking**: Whether the guest needs a car parking space (Yes or No).")
-st.sidebar.markdown("**Room Type**: The type of room booked.")
-st.sidebar.markdown("**Lead Time**: The number of days between booking and check-in.")
-st.sidebar.markdown("**Arrival Year**: The year of arrival.")
-st.sidebar.markdown("**Arrival Month**: The month of arrival.")
-st.sidebar.markdown("**Arrival Date**: The date of arrival.")
-st.sidebar.markdown("**Market Segment**: The segment of the market the booking belongs to.")
-st.sidebar.markdown("**Repeated Guest**: Whether the guest has made a previous booking (Yes or No).")
-st.sidebar.markdown("**Previous Cancellations**: The number of bookings previously canceled.")
-st.sidebar.markdown("**Previous Bookings Not Canceled**: The number of bookings not canceled.")
-st.sidebar.markdown("**Price per Room**: The average price per room (in Euro).")
-st.sidebar.markdown("**Special Requests**: Number of special requests made by the guest.")
-
 # Input fields for user
 input_data = {}
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    input_data['no_of_adults'] = st.selectbox("Number of Adults", [0, 1, 2, 3, 4])
+    input_data['no_of_adults'] = st.selectbox("Number of Adults", [1, 2, 3, 4])
     input_data['no_of_children'] = st.selectbox("Number of Children", [0, 1, 2, 3, 9, 10])
     input_data['no_of_weekend_nights'] = st.selectbox("Number of Weekend Nights", [0, 1, 2, 3, 4, 5, 6, 7])
     input_data['no_of_week_nights'] = st.selectbox("Number of Week Nights", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
