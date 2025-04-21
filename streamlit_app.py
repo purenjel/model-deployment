@@ -47,7 +47,6 @@ class HotelBookingPreprocessor:
         X = self.split_data()  # Only return features for inference, no target (y)
         return X
 
-
 # Streamlit app layout and functionality
 st.title("Hotel Booking Cancellation Prediction")
 st.image("https://www.hoteldel.com/wp-content/uploads/2021/01/hotel-del-coronado-views-suite-K1TOS1-K1TOJ1-1600x900-1.jpg")
@@ -107,7 +106,7 @@ if st.button("Predict Cancellation"):
 
     # Preprocess the data using HotelBookingPreprocessor
     preprocessor = HotelBookingPreprocessor(input_df)
-    X_input, _ = preprocessor.preprocess()  # Get features after preprocessing
+    X_input = preprocessor.preprocess()  # Get features after preprocessing
 
     # Make prediction using the trained XGBoost model
     prediction = model.predict(X_input)
