@@ -70,6 +70,7 @@ if st.button("Predict Cancellation"):
 
     # Apply the necessary preprocessing (like encoding categorical features)
     try:
+        # Handle unseen labels in encoding
         input_df['type_of_meal_plan'] = encoders['type_of_meal_plan'].transform(input_df['type_of_meal_plan'])
         input_df['room_type_reserved'] = encoders['room_type_reserved'].transform(input_df['room_type_reserved'])
         input_df['market_segment_type'] = encoders['market_segment_type'].transform(input_df['market_segment_type'])
@@ -81,6 +82,13 @@ if st.button("Predict Cancellation"):
     except KeyError as e:
         st.error(f"Error during encoding: {e}")
         st.stop()
+    except ValueError as e:
+        # Handle unseen labels in the encoder
+        st.warning(f"Unseen label encountered: {e}. Using a default value for encoding.")
+        # Use a default encoding value (e.g., 'Not Selected' or 'Room_Type 1')
+        input_df['type_of_meal_plan'] = encoders['type_of_meal_plan'].transform(['Not Selected'])[0]  # Handle unseen label by using default value
+        input_df['room_type_reserved'] = encoders['room_type_reserved'].transform(['Room_Type 1'])[0]  # Handle unseen label by using default value
+        input_df['market_segment_type'] = encoders['market_segment_type'].transform(['Online'])[0]  # Handle unseen label by using default value
     except Exception as e:
         st.error(f"Unexpected error during encoding: {e}")
         st.stop()
