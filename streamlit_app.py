@@ -37,8 +37,9 @@ class HotelBookingPreprocessor:
 
     def split_data(self):
         """Split the data into features (X) and target (y), then into training and test sets."""
-        # No need for 'booking_status' in the inference phase (it's the target variable during training)
-        X = self.df.drop(columns=['Booking_ID'])  # Don't include 'booking_status' for inference
+        # No need for 'Booking_ID' or 'booking_status' in the inference phase
+        # 'Booking_ID' does not exist in the inference data, so it can be ignored during prediction
+        X = self.df.drop(columns=['booking_status'], errors='ignore')  # Ignore 'booking_status' if it doesn't exist
         return X
 
     def preprocess(self):
