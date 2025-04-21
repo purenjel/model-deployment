@@ -51,7 +51,7 @@ with col1:
 with col2:
     input_data['room_type_reserved'] = st.selectbox("Room Type", ['Room Type 1', 'Room Type 2', 'Room Type 3'])  # Example room types
     input_data['lead_time'] = st.number_input("Lead Time (days)", 0, 365)
-    input_data['arrival_year'] = st.number_input("Arrival Year", 2020, 2025)
+    input_data['arrival_year']: st.selectbox('Arrival Year', [2017, 2018]),
     input_data['arrival_month'] = st.number_input("Arrival Month", 1, 12)
     input_data['arrival_date'] = st.number_input("Arrival Date", 1, 31)
     input_data['market_segment_type'] = st.selectbox("Market Segment", ['Direct', 'Corporate', 'Online TA', 'Offline TA/TO'])  # Example market segments
