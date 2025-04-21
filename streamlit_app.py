@@ -57,6 +57,11 @@ class HotelBookingPreprocessor:
         self.fill_missing_values()
         self.encode_labels()
         X = self.split_data()  # Only return features for inference, no target (y)
+        # Convert all columns to numeric explicitly
+        X = X.apply(pd.to_numeric, errors='coerce')
+        # Check for NaN values and fill them if necessary
+        if X.isnull().sum().any():
+            X.fillna(X.mean(), inplace=True)  # Use mean to fill NaNs for numeric columns
         return X
 
 
