@@ -12,7 +12,7 @@ encoder = components["encoder"]
 model = components["models"]
 
 # App layout and title
-st.image("https://example.com/hotel_image.jpg")  # Replace with an appropriate image for the hotel app
+st.image("https://www.hoteldel.com/wp-content/uploads/2021/01/hotel-del-coronado-views-suite-K1TOS1-K1TOJ1-1600x900-1.jpg")  # Replace with an appropriate image for the hotel app
 st.title("Hotel Booking Cancellation Prediction")
 
 st.caption("This app predicts whether a hotel booking will be canceled based on guest booking details.")
