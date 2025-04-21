@@ -10,7 +10,7 @@ with open("best_xgboost_model.pkl", "rb") as f:
 with open("label_encoders.pkl", "rb") as f:
     encoders = pickle.load(f)
 
-# Function to handle unseen labels
+# Function to handle unseen labels by mapping them to a default value
 def handle_unseen_label(encoder, value, default_value):
     if value in encoder.classes_:
         return value
@@ -77,7 +77,7 @@ if st.button("Predict Cancellation"):
 
     # Apply the necessary preprocessing (like encoding categorical features)
     try:
-        # Handle unseen labels
+        # Handle unseen labels and map them to default values
         input_df['type_of_meal_plan'] = handle_unseen_label(encoders['type_of_meal_plan'], input_df['type_of_meal_plan'][0], 'Not Selected')
         input_df['room_type_reserved'] = handle_unseen_label(encoders['room_type_reserved'], input_df['room_type_reserved'][0], 'Room_Type 1')
         input_df['market_segment_type'] = handle_unseen_label(encoders['market_segment_type'], input_df['market_segment_type'][0], 'Online')
