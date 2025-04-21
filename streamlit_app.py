@@ -16,7 +16,7 @@ with open("room_type_encoder.pkl", "rb") as f:
 with open("market_segment_encoder.pkl", "rb") as f:
     market_segment_encoder = pickle.load(f)
 
-# Function to handle unseen labels by mapping them to a default value
+# Function to safely handle unseen labels by mapping them to a default value
 def handle_unseen_label(encoder, value, default_value):
     if value in encoder.classes_:
         return encoder.transform([value])[0]
