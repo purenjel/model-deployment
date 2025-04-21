@@ -49,7 +49,7 @@ with col1:
     input_data['required_car_parking_space'] = st.selectbox("Car Parking", ['No', 'Yes'])  # Changed to Yes/No
 
 with col2:
-    input_data['room_type_reserved'] = st.selectbox("Room Type", ['Room_Type 1', 'Room_Type 4', 'Room_Type 6', 'Room_Type 2', 'Room_Type 5', 'Room_Type 7', 'Room_Type 3'])
+    input_data['room_type_reserved'] = st.selectbox("Room Type", ['Room Type 1', 'Room Type 2', 'Room Type 3', 'Room Type 4', 'Room Type 5', 'Room Type 6', 'Room Type 7'])
     input_data['lead_time'] = st.number_input("Lead Time (days)", min_value=0, max_value=352)
     input_data['arrival_year'] = st.selectbox("Arrival Year", [2017, 2018])
     input_data['arrival_month'] = st.selectbox("Arrival Month", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
@@ -60,7 +60,7 @@ with col3:
     input_data['repeated_guest'] = st.selectbox("Repeated Guest", ['No', 'Yes'])  # Changed to Yes/No
     input_data['no_of_previous_cancellations'] = st.selectbox("Previous Cancellations", [0, 1, 2, 3, 4, 5, 6, 11, 13])
     input_data['no_of_previous_bookings_not_canceled'] = st.selectbox("Previous Bookings Not Canceled", list(range(0, 58)))
-    input_data['avg_price_per_room'] = st.number_input("Average Price per Room (EUR)", min_value=1.0, max_value=500.0)
+    input_data['avg_price_per_room'] = st.number_input("Average Price per Room (EUR)", min_value=1.0, max_value=1000.0)
     input_data['no_of_special_requests'] = st.selectbox("Special Requests", [0, 1, 2, 3, 4, 5])
 
 # When the button is clicked, make a prediction
