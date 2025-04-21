@@ -17,27 +17,33 @@ with open("label_encoders.pkl", "rb") as f:
 class HotelBookingPreprocessor:
     def __init__(self, df):
         self.df = df
-        self.encoder = LabelEncoder()
+        # Initialize separate encoders for each categorical feature
+        self.meal_plan_encoder = LabelEncoder()
+        self.room_type_encoder = LabelEncoder()
+        self.market_segment_encoder = LabelEncoder()
 
     def fill_missing_values(self):
+        """Fill missing values in the dataframe."""
         self.df['required_car_parking_space'].fillna(self.df['required_car_parking_space'].mode()[0], inplace=True)
         self.df['type_of_meal_plan'].fillna(self.df['type_of_meal_plan'].mode()[0], inplace=True)
         self.df['avg_price_per_room'].fillna(self.df['avg_price_per_room'].median(), inplace=True)
         self.df['no_of_adults'] = self.df['no_of_adults'].replace(0, 1)
 
     def encode_labels(self):
-        # Apply the encoding to the relevant columns
-        self.df['type_of_meal_plan'] = self.encoder.fit_transform(self.df['type_of_meal_plan'])
-        self.df['room_type_reserved'] = self.encoder.fit_transform(self.df['room_type_reserved'])
-        self.df['market_segment_type'] = self.encoder.fit_transform(self.df['market_segment_type'])
+        """Encode categorical features using separate LabelEncoders."""
+        self.df['type_of_meal_plan'] = self.meal_plan_encoder.fit_transform(self.df['type_of_meal_plan'])
+        self.df['room_type_reserved'] = self.room_type_encoder.fit_transform(self.df['room_type_reserved'])
+        self.df['market_segment_type'] = self.market_segment_encoder.fit_transform(self.df['market_segment_type'])
         self.df['booking_status'] = self.df['booking_status'].map({'Not_Canceled': 0, 'Canceled': 1})
 
     def split_data(self):
+        """Split the data into features (X) and target (y), then into training and test sets."""
         X = self.df.drop(columns=['booking_status', 'Booking_ID'])
         y = self.df['booking_status']
         return X, y
 
     def preprocess(self):
+        """Execute the full preprocessing pipeline."""
         self.fill_missing_values()
         self.encode_labels()
         X, y = self.split_data()
