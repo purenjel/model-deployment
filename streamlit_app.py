@@ -3,12 +3,12 @@ import streamlit as st
 import numpy as np
 import pickle
 
-# Load the saved model and encoder separately
+# Load the saved model and encoders separately
 with open("best_xgboost_model.pkl", "rb") as f:
     model = pickle.load(f)
 
 with open("label_encoders.pkl", "rb") as f:
-    encoder = pickle.load(f)
+    encoders = pickle.load(f)
 
 # App layout and title
 st.image("https://www.hoteldel.com/wp-content/uploads/2021/01/hotel-del-coronado-views-suite-K1TOS1-K1TOJ1-1600x900-1.jpg")  # Replace with an appropriate image for the hotel app
@@ -70,9 +70,9 @@ if st.button("Predict Cancellation"):
 
     # Apply the necessary preprocessing (like encoding categorical features)
     try:
-        input_df['type_of_meal_plan'] = encoder.transform(input_df['type_of_meal_plan'])
-        input_df['room_type_reserved'] = encoder.transform(input_df['room_type_reserved'])
-        input_df['market_segment_type'] = encoder.transform(input_df['market_segment_type'])
+        input_df['type_of_meal_plan'] = encoders['type_of_meal_plan'].transform(input_df['type_of_meal_plan'])
+        input_df['room_type_reserved'] = encoders['room_type_reserved'].transform(input_df['room_type_reserved'])
+        input_df['market_segment_type'] = encoders['market_segment_type'].transform(input_df['market_segment_type'])
     except Exception as e:
         st.error(f"Error during encoding: {e}")
         st.stop()
