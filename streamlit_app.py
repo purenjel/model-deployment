@@ -10,6 +10,13 @@ with open("best_xgboost_model.pkl", "rb") as f:
 with open("label_encoders.pkl", "rb") as f:
     encoders = pickle.load(f)
 
+# Function to handle unseen labels
+def handle_unseen_label(encoder, value, default_value):
+    if value in encoder.classes_:
+        return value
+    else:
+        return default_value
+
 # App layout and title
 st.image("https://www.hoteldel.com/wp-content/uploads/2021/01/hotel-del-coronado-views-suite-K1TOS1-K1TOJ1-1600x900-1.jpg")  # Replace with an appropriate image for the hotel app
 st.title("Hotel Booking Cancellation Prediction")
@@ -49,7 +56,7 @@ with col1:
     input_data['required_car_parking_space'] = st.selectbox("Car Parking", ['No', 'Yes'])  # Changed to Yes/No
 
 with col2:
-    input_data['room_type_reserved'] = st.selectbox("Room Type", ['Room Type 1', 'Room Type 2', 'Room Type 3', 'Room Type 4', 'Room Type 5', 'Room Type 6', 'Room Type 7'])
+    input_data['room_type_reserved'] = st.selectbox("Room Type", ['Room_Type 1', 'Room_Type 4', 'Room_Type 6', 'Room_Type 2', 'Room_Type 5', 'Room_Type 7', 'Room_Type 3'])
     input_data['lead_time'] = st.number_input("Lead Time (days)", min_value=0, max_value=352)
     input_data['arrival_year'] = st.selectbox("Arrival Year", [2017, 2018])
     input_data['arrival_month'] = st.selectbox("Arrival Month", [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12])
@@ -60,7 +67,7 @@ with col3:
     input_data['repeated_guest'] = st.selectbox("Repeated Guest", ['No', 'Yes'])  # Changed to Yes/No
     input_data['no_of_previous_cancellations'] = st.selectbox("Previous Cancellations", [0, 1, 2, 3, 4, 5, 6, 11, 13])
     input_data['no_of_previous_bookings_not_canceled'] = st.selectbox("Previous Bookings Not Canceled", list(range(0, 58)))
-    input_data['avg_price_per_room'] = st.number_input("Average Price per Room (EUR)", min_value=1.0, max_value=1000.0)
+    input_data['avg_price_per_room'] = st.number_input("Average Price per Room (EUR)", min_value=1.0, max_value=500.0)
     input_data['no_of_special_requests'] = st.selectbox("Special Requests", [0, 1, 2, 3, 4, 5])
 
 # When the button is clicked, make a prediction
@@ -70,25 +77,23 @@ if st.button("Predict Cancellation"):
 
     # Apply the necessary preprocessing (like encoding categorical features)
     try:
-        # Handle unseen labels in encoding
-        input_df['type_of_meal_plan'] = encoders['type_of_meal_plan'].transform(input_df['type_of_meal_plan'])
-        input_df['room_type_reserved'] = encoders['room_type_reserved'].transform(input_df['room_type_reserved'])
-        input_df['market_segment_type'] = encoders['market_segment_type'].transform(input_df['market_segment_type'])
+        # Handle unseen labels
+        input_df['type_of_meal_plan'] = handle_unseen_label(encoders['type_of_meal_plan'], input_df['type_of_meal_plan'][0], 'Not Selected')
+        input_df['room_type_reserved'] = handle_unseen_label(encoders['room_type_reserved'], input_df['room_type_reserved'][0], 'Room_Type 1')
+        input_df['market_segment_type'] = handle_unseen_label(encoders['market_segment_type'], input_df['market_segment_type'][0], 'Online')
         
         # Convert 'Yes' and 'No' to 1 and 0 for 'required_car_parking_space' and 'repeated_guest'
         input_df['required_car_parking_space'] = input_df['required_car_parking_space'].map({'No': 0, 'Yes': 1})
         input_df['repeated_guest'] = input_df['repeated_guest'].map({'No': 0, 'Yes': 1})
         
+        # Transform categorical features using the encoder
+        input_df['type_of_meal_plan'] = encoders['type_of_meal_plan'].transform([input_df['type_of_meal_plan'][0]])[0]
+        input_df['room_type_reserved'] = encoders['room_type_reserved'].transform([input_df['room_type_reserved'][0]])[0]
+        input_df['market_segment_type'] = encoders['market_segment_type'].transform([input_df['market_segment_type'][0]])[0]
+        
     except KeyError as e:
         st.error(f"Error during encoding: {e}")
         st.stop()
-    except ValueError as e:
-        # Handle unseen labels in the encoder
-        st.warning(f"Unseen label encountered: {e}. Using a default value for encoding.")
-        # Use a default encoding value (e.g., 'Not Selected' or 'Room_Type 1')
-        input_df['type_of_meal_plan'] = encoders['type_of_meal_plan'].transform(['Not Selected'])[0]  # Handle unseen label by using default value
-        input_df['room_type_reserved'] = encoders['room_type_reserved'].transform(['Room_Type 1'])[0]  # Handle unseen label by using default value
-        input_df['market_segment_type'] = encoders['market_segment_type'].transform(['Online'])[0]  # Handle unseen label by using default value
     except Exception as e:
         st.error(f"Unexpected error during encoding: {e}")
         st.stop()
