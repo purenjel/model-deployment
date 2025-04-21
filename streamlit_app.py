@@ -1,76 +1,84 @@
-import streamlit as st
-import pickle
 import pandas as pd
+import streamlit as st
 import numpy as np
+import pickle
 
-class HotelBookingApp:
-    def __init__(self):
-        # Load the pre-trained model and label encoders
-        self.model, self.encoder = self.load_model('best_xgboost_model.pkl', 'label_encoders.pkl')
+# Load the saved components:
+with open("best_xgboost_model.pkl", "rb") as f:
+    components = pickle.load(f)
 
-    def load_model(self, model_filename, encoder_filename):
-        """Load the trained model and label encoders."""
-        with open(model_filename, 'rb') as model_file:
-            model = pickle.load(model_file)
-        with open(encoder_filename, 'rb') as encoders_file:
-            encoder = pickle.load(encoders_file)
-        return model, encoder
+# Extract the individual components (imputer, encoder, model):
+encoder = components["encoder"]
+model = components["models"]
 
-    def preprocess_input(self, input_df):
-        """Preprocess user input: encode categorical features."""
-        encoded_df = input_df.copy()
-        
-        # Encode categorical columns
-        encoded_df['type_of_meal_plan'] = self.encoder.transform(encoded_df['type_of_meal_plan'])
-        encoded_df['room_type_reserved'] = self.encoder.transform(encoded_df['room_type_reserved'])
-        encoded_df['market_segment_type'] = self.encoder.transform(encoded_df['market_segment_type'])
-        
-        return encoded_df
+# App layout and title
+st.image("https://example.com/hotel_image.jpg")  # Replace with an appropriate image for the hotel app
+st.title("Hotel Booking Cancellation Prediction")
 
-    def predict(self, input_df):
-        """Predict booking cancellation status."""
-        input_df = self.preprocess_input(input_df)
-        prediction = self.model.predict(input_df)
-        probability = self.model.predict_proba(input_df)[0][1]
-        return prediction[0], probability
+st.caption("This app predicts whether a hotel booking will be canceled based on guest booking details.")
 
-    def run(self):
-        st.title("🏨 Hotel Booking Cancellation Prediction")
-        st.write("Predict whether a hotel booking will be **cancelled** or **not cancelled** based on the input data below")
-        st.markdown("---")
+# Sidebar description
+st.sidebar.header("Required Input Fields")
+st.sidebar.markdown("**Number of Adults**: The number of adults in the booking.")
+st.sidebar.markdown("**Number of Children**: The number of children in the booking.")
+st.sidebar.markdown("**Weekend Nights**: The number of nights booked for weekends.")
+st.sidebar.markdown("**Week Nights**: The number of week nights booked.")
+st.sidebar.markdown("**Meal Plan**: The meal plan chosen (e.g., Room Only, Half Board, etc.).")
+st.sidebar.markdown("**Car Parking**: Whether the guest needs a car parking space (0: No, 1: Yes).")
+st.sidebar.markdown("**Room Type**: The type of room booked.")
+st.sidebar.markdown("**Lead Time**: The number of days between booking and check-in.")
+st.sidebar.markdown("**Arrival Year**: The year of arrival.")
+st.sidebar.markdown("**Arrival Month**: The month of arrival.")
+st.sidebar.markdown("**Arrival Date**: The date of arrival.")
+st.sidebar.markdown("**Market Segment**: The segment of the market the booking belongs to.")
+st.sidebar.markdown("**Repeated Guest**: Whether the guest has made a previous booking (0: No, 1: Yes).")
+st.sidebar.markdown("**Previous Cancellations**: The number of bookings previously canceled.")
+st.sidebar.markdown("**Previous Bookings Not Canceled**: The number of bookings not canceled.")
+st.sidebar.markdown("**Price per Room**: The average price per room (in Euro).")
+st.sidebar.markdown("**Special Requests**: Number of special requests made by the guest.")
 
-        st.subheader("✏️ Input Booking Information")
+# Create the input fields for the user
+input_data = {}
+col1, col2, col3 = st.columns(3)
 
-        # Input fields for booking information
-        user_input = pd.DataFrame([{
-            'no_of_adults': st.number_input('Number of Adults', min_value=1, max_value=10, value=1),
-            'no_of_children': st.number_input('Number of Children', min_value=0, max_value=10, value=0),
-            'no_of_weekend_nights': st.number_input('Weekend Nights', min_value=0, max_value=7, value=0),
-            'no_of_week_nights': st.number_input('Week Nights', min_value=0, max_value=7, value=0),
-            'type_of_meal_plan': st.selectbox('Meal Plan Type', ['Room Only', 'BB', 'HB', 'FB']),
-            'required_car_parking_space': st.selectbox('Car Parking Required?', [0, 1]),  # 0: No, 1: Yes
-            'room_type_reserved': st.selectbox('Room Type Reserved', ['Room Type 1', 'Room Type 2', 'Room Type 3']),
-            'lead_time': st.slider('Lead Time (days)', 0, 365, 30),
-            'arrival_year': st.selectbox('Arrival Year', [2017, 2018]),
-            'arrival_month': st.slider('Arrival Month', 1, 12, 1),
-            'arrival_date': st.slider('Arrival Date', 1, 31, 1),
-            'market_segment_type': st.selectbox('Market Segment Type', ['Direct', 'Corporate', 'Online TA', 'Offline TA/TO']),
-            'repeated_guest': st.selectbox('Repeated Guest?', [0, 1]),
-            'no_of_previous_cancellations': st.slider('Previous Cancellations', 0, 10, 0),
-            'no_of_previous_bookings_not_canceled': st.slider('Previous Non-Cancelled Bookings', 0, 10, 0),
-            'avg_price_per_room': st.number_input('Average Price per Room (EUR)', min_value=1.0, max_value=1000.0, value=100.0),
-            'no_of_special_requests': st.slider('Special Requests', 0, 5, 0)
-        }])
+with col1:
+    input_data['no_of_adults'] = st.slider("Number of Adults", 1, 10)
+    input_data['no_of_children'] = st.slider("Number of Children", 0, 5)
+    input_data['no_of_weekend_nights'] = st.slider("Number of Weekend Nights", 0, 7)
+    input_data['no_of_week_nights'] = st.slider("Number of Week Nights", 0, 7)
+    input_data['type_of_meal_plan'] = st.selectbox("Meal Plan", ['Room Only', 'BB', 'HB', 'FB'])  # Example meal plans
+    input_data['required_car_parking_space'] = st.selectbox("Car Parking", [0, 1])  # 0: No, 1: Yes
 
-        if st.button("🔮 Predict Booking Status"):
-            # Make prediction
-            pred, prob = self.predict(user_input)
-            status = "✅ Not Cancelled" if pred == 0 else "❌ Cancelled"
-            st.success(f"### Prediction: {status}")
-            st.info(f"### Cancellation Probability: {prob:.2%}")
-            st.markdown("#### 🔎 Data Used for Prediction")
-            st.dataframe(user_input)
+with col2:
+    input_data['room_type_reserved'] = st.selectbox("Room Type", ['Room Type 1', 'Room Type 2', 'Room Type 3'])  # Example room types
+    input_data['lead_time'] = st.number_input("Lead Time (days)", 0, 365)
+    input_data['arrival_year'] = st.number_input("Arrival Year", 2020, 2025)
+    input_data['arrival_month'] = st.number_input("Arrival Month", 1, 12)
+    input_data['arrival_date'] = st.number_input("Arrival Date", 1, 31)
+    input_data['market_segment_type'] = st.selectbox("Market Segment", ['Direct', 'Corporate', 'Online TA', 'Offline TA/TO'])  # Example market segments
 
-if __name__ == "__main__":
-    app = HotelBookingApp()
-    app.run()
+with col3:
+    input_data['repeated_guest'] = st.selectbox("Repeated Guest", [0, 1])  # 0: No, 1: Yes
+    input_data['no_of_previous_cancellations'] = st.slider("Previous Cancellations", 0, 10)
+    input_data['no_of_previous_bookings_not_canceled'] = st.slider("Previous Bookings Not Canceled", 0, 10)
+    input_data['avg_price_per_room'] = st.number_input("Average Price per Room (EUR)", 1, 1000)
+    input_data['no_of_special_requests'] = st.slider("Special Requests", 0, 10)
+
+# When the button is clicked, make a prediction
+if st.button("Predict Cancellation"):
+    # Convert the input data to a pandas DataFrame
+    input_df = pd.DataFrame([input_data])
+
+    # Apply the necessary preprocessing (like encoding categorical features)
+    input_df['type_of_meal_plan'] = encoder.transform(input_df['type_of_meal_plan'])
+    input_df['room_type_reserved'] = encoder.transform(input_df['room_type_reserved'])
+    input_df['market_segment_type'] = encoder.transform(input_df['market_segment_type'])
+
+    # Make prediction using the trained XGBoost model
+    prediction = model.predict(input_df)
+
+    # Display the prediction result
+    if prediction[0] == 1:
+        st.write("The booking is likely to be Canceled.")
+    else:
+        st.write("The booking is likely to be Not Canceled.")
