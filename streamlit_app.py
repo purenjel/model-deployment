@@ -45,6 +45,7 @@ class HotelBookingPreprocessor:
 
 # Streamlit app layout and functionality
 st.title("Hotel Booking Cancellation Prediction")
+st.image("https://www.hoteldel.com/wp-content/uploads/2021/01/hotel-del-coronado-views-suite-K1TOS1-K1TOJ1-1600x900-1.jpg")
 st.caption("This app predicts whether a hotel booking will be canceled based on guest booking details.")
 
 # Sidebar for input fields
