@@ -15,12 +15,12 @@ with open("label_encoders.pkl", "rb") as f:
 
 # Preprocessing class
 class HotelBookingPreprocessor:
-    def __init__(self, df):
+    def __init__(self, df, encoders=None):
         self.df = df
-        # Initialize separate encoders for each categorical feature
-        self.meal_plan_encoder = LabelEncoder()
-        self.room_type_encoder = LabelEncoder()
-        self.market_segment_encoder = LabelEncoder()
+        # Use the encoders passed as arguments (which were used during training)
+        self.meal_plan_encoder = encoders['type_of_meal_plan']
+        self.room_type_encoder = encoders['room_type_reserved']
+        self.market_segment_encoder = encoders['market_segment_type']
 
     def fill_missing_values(self):
         """Fill missing values in the dataframe."""
@@ -30,10 +30,10 @@ class HotelBookingPreprocessor:
         self.df['no_of_adults'] = self.df['no_of_adults'].replace(0, 1)
 
     def encode_labels(self):
-        """Encode categorical features using separate LabelEncoders."""
-        self.df['type_of_meal_plan'] = self.meal_plan_encoder.fit_transform(self.df['type_of_meal_plan'])
-        self.df['room_type_reserved'] = self.room_type_encoder.fit_transform(self.df['room_type_reserved'])
-        self.df['market_segment_type'] = self.market_segment_encoder.fit_transform(self.df['market_segment_type'])
+        """Encode categorical features using the existing encoders."""
+        self.df['type_of_meal_plan'] = self.meal_plan_encoder.transform(self.df['type_of_meal_plan'])
+        self.df['room_type_reserved'] = self.room_type_encoder.transform(self.df['room_type_reserved'])
+        self.df['market_segment_type'] = self.market_segment_encoder.transform(self.df['market_segment_type'])
 
     def split_data(self):
         """Split the data into features (X) and target (y), but only return X for inference."""
@@ -104,8 +104,8 @@ if st.button("Predict Cancellation"):
     # Convert the input data to a pandas DataFrame
     input_df = pd.DataFrame([input_data])
 
-    # Preprocess the data using HotelBookingPreprocessor
-    preprocessor = HotelBookingPreprocessor(input_df)
+    # Pass the encoders to the preprocessor
+    preprocessor = HotelBookingPreprocessor(input_df, encoders=encoders)
     X_input = preprocessor.preprocess()  # Get features after preprocessing
 
     # Make prediction using the trained XGBoost model
