@@ -13,6 +13,11 @@ with open("best_xgboost_model.pkl", "rb") as f:
 with open("label_encoders.pkl", "rb") as f:
     encoders = pickle.load(f)
 
+# Extract the individual encoders from the loaded dictionary
+meal_plan_encoder = encoders['type_of_meal_plan']
+room_type_encoder = encoders['room_type_reserved']
+market_segment_encoder = encoders['market_segment_type']
+
 # Preprocessing class
 class HotelBookingPreprocessor:
     def __init__(self, df, meal_plan_encoder, room_type_encoder, market_segment_encoder):
