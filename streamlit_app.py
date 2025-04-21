@@ -69,9 +69,13 @@ if st.button("Predict Cancellation"):
     input_df = pd.DataFrame([input_data])
 
     # Apply the necessary preprocessing (like encoding categorical features)
-    input_df['type_of_meal_plan'] = encoder.transform(input_df['type_of_meal_plan'])
-    input_df['room_type_reserved'] = encoder.transform(input_df['room_type_reserved'])
-    input_df['market_segment_type'] = encoder.transform(input_df['market_segment_type'])
+    try:
+        input_df['type_of_meal_plan'] = encoder.transform(input_df['type_of_meal_plan'])
+        input_df['room_type_reserved'] = encoder.transform(input_df['room_type_reserved'])
+        input_df['market_segment_type'] = encoder.transform(input_df['market_segment_type'])
+    except Exception as e:
+        st.error(f"Error during encoding: {e}")
+        st.stop()
 
     # Make prediction using the trained XGBoost model
     prediction = model.predict(input_df)
