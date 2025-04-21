@@ -7,16 +7,10 @@ import pickle
 with open("best_xgboost_model.pkl", "rb") as f:
     model = pickle.load(f)
 
-with open("meal_plan_encoder.pkl", "rb") as f:
-    meal_plan_encoder = pickle.load(f)
+with open("label_encoders.pkl", "rb") as f:
+    encoders = pickle.load(f)
 
-with open("room_type_encoder.pkl", "rb") as f:
-    room_type_encoder = pickle.load(f)
-
-with open("market_segment_encoder.pkl", "rb") as f:
-    market_segment_encoder = pickle.load(f)
-
-# Function to safely handle unseen labels by mapping them to a default value
+# Function to handle unseen labels by mapping them to a default value
 def handle_unseen_label(encoder, value, default_value):
     if value in encoder.classes_:
         return encoder.transform([value])[0]
@@ -84,9 +78,9 @@ if st.button("Predict Cancellation"):
     # Apply the necessary preprocessing (like encoding categorical features)
     try:
         # Handle unseen labels and map them to default values
-        input_df['type_of_meal_plan'] = handle_unseen_label(meal_plan_encoder, input_df['type_of_meal_plan'][0], 'Not Selected')
-        input_df['room_type_reserved'] = handle_unseen_label(room_type_encoder, input_df['room_type_reserved'][0], 'Room_Type 1')
-        input_df['market_segment_type'] = handle_unseen_label(market_segment_encoder, input_df['market_segment_type'][0], 'Online')
+        input_df['type_of_meal_plan'] = handle_unseen_label(encoders['type_of_meal_plan'], input_df['type_of_meal_plan'][0], 'Not Selected')
+        input_df['room_type_reserved'] = handle_unseen_label(encoders['room_type_reserved'], input_df['room_type_reserved'][0], 'Room_Type 1')
+        input_df['market_segment_type'] = handle_unseen_label(encoders['market_segment_type'], input_df['market_segment_type'][0], 'Online')
         
         # Convert 'Yes' and 'No' to 1 and 0 for 'required_car_parking_space' and 'repeated_guest'
         input_df['required_car_parking_space'] = input_df['required_car_parking_space'].map({'No': 0, 'Yes': 1})
