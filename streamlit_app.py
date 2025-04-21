@@ -111,6 +111,6 @@ if st.button("Predict Cancellation"):
 
     # Display the prediction result
     if prediction[0] == 1:
-        st.write("The booking is likely to be Canceled.")
+        st.markdown("<h3 style='font-weight: bold; font-size: 24px;'>The booking is likely to be Canceled.</h3>", unsafe_allow_html=True)
     else:
-        st.write("The booking is likely to be Not Canceled.")
+        st.markdown("<h3 style='font-weight: bold; font-size: 24px;'>The booking is likely to be Not Canceled.</h3>", unsafe_allow_html=True)
