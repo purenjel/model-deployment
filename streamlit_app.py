@@ -10,12 +10,13 @@ with open("best_xgboost_model.pkl", "rb") as f:
 with open("label_encoders.pkl", "rb") as f:
     encoders = pickle.load(f)
 
-# Function to safely handle unseen labels by mapping them to a default value
+# Function to handle unseen labels
 def handle_unseen_label(encoder, value, default_value):
     if value in encoder.classes_:
         return encoder.transform([value])[0]
     else:
-        return encoder.transform([default_value])[0]  # Map to a default value
+        # If unseen label, return a default value from the encoder's classes
+        return encoder.transform([default_value])[0]
 
 # App layout and title
 st.image("https://www.hoteldel.com/wp-content/uploads/2021/01/hotel-del-coronado-views-suite-K1TOS1-K1TOJ1-1600x900-1.jpg")  # Replace with an appropriate image for the hotel app
