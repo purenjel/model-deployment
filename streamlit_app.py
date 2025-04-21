@@ -2,6 +2,7 @@ import pandas as pd
 import streamlit as st
 import numpy as np
 import pickle
+from sklearn.preprocessing import LabelEncoder
 
 # Load the saved model and encoders separately
 with open("best_xgboost_model.pkl", "rb") as f:
@@ -73,8 +74,11 @@ if st.button("Predict Cancellation"):
         input_df['type_of_meal_plan'] = encoders['type_of_meal_plan'].transform(input_df['type_of_meal_plan'])
         input_df['room_type_reserved'] = encoders['room_type_reserved'].transform(input_df['room_type_reserved'])
         input_df['market_segment_type'] = encoders['market_segment_type'].transform(input_df['market_segment_type'])
-    except Exception as e:
+    except KeyError as e:
         st.error(f"Error during encoding: {e}")
+        st.stop()
+    except Exception as e:
+        st.error(f"Unexpected error during encoding: {e}")
         st.stop()
 
     # Make prediction using the trained XGBoost model
