@@ -1,7 +1,10 @@
 import pandas as pd
 import streamlit as st
-import numpy as np
 import pickle
+import numpy as np
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score, classification_report
+from xgboost import XGBClassifier
 
 # Load the saved model and encoders separately
 with open("best_xgboost_model.pkl", "rb") as f:
@@ -10,20 +13,41 @@ with open("best_xgboost_model.pkl", "rb") as f:
 with open("label_encoders.pkl", "rb") as f:
     encoders = pickle.load(f)
 
-# Function to handle unseen labels by mapping them to a default value
-def handle_unseen_label(encoder, value, default_value):
-    if value in encoder.classes_:
-        return encoder.transform([value])[0]
-    else:
-        return encoder.transform([default_value])[0]  # Use the predefined default value if unseen
+# Preprocessing class
+class HotelBookingPreprocessor:
+    def __init__(self, df):
+        self.df = df
+        self.encoder = LabelEncoder()
 
-# App layout and title
-st.image("https://www.hoteldel.com/wp-content/uploads/2021/01/hotel-del-coronado-views-suite-K1TOS1-K1TOJ1-1600x900-1.jpg")  # Replace with an appropriate image for the hotel app
+    def fill_missing_values(self):
+        self.df['required_car_parking_space'].fillna(self.df['required_car_parking_space'].mode()[0], inplace=True)
+        self.df['type_of_meal_plan'].fillna(self.df['type_of_meal_plan'].mode()[0], inplace=True)
+        self.df['avg_price_per_room'].fillna(self.df['avg_price_per_room'].median(), inplace=True)
+        self.df['no_of_adults'] = self.df['no_of_adults'].replace(0, 1)
+
+    def encode_labels(self):
+        # Apply the encoding to the relevant columns
+        self.df['type_of_meal_plan'] = self.encoder.fit_transform(self.df['type_of_meal_plan'])
+        self.df['room_type_reserved'] = self.encoder.fit_transform(self.df['room_type_reserved'])
+        self.df['market_segment_type'] = self.encoder.fit_transform(self.df['market_segment_type'])
+        self.df['booking_status'] = self.df['booking_status'].map({'Not_Canceled': 0, 'Canceled': 1})
+
+    def split_data(self):
+        X = self.df.drop(columns=['booking_status', 'Booking_ID'])
+        y = self.df['booking_status']
+        return X, y
+
+    def preprocess(self):
+        self.fill_missing_values()
+        self.encode_labels()
+        X, y = self.split_data()
+        return X, y
+
+# Streamlit app layout and functionality
 st.title("Hotel Booking Cancellation Prediction")
-
 st.caption("This app predicts whether a hotel booking will be canceled based on guest booking details.")
 
-# Sidebar description
+# Sidebar for input fields
 st.sidebar.header("Required Input Fields")
 st.sidebar.markdown("**Number of Adults**: The number of adults in the booking.")
 st.sidebar.markdown("**Number of Children**: The number of children in the booking.")
@@ -43,7 +67,7 @@ st.sidebar.markdown("**Previous Bookings Not Canceled**: The number of bookings 
 st.sidebar.markdown("**Price per Room**: The average price per room (in Euro).")
 st.sidebar.markdown("**Special Requests**: Number of special requests made by the guest.")
 
-# Create the input fields for the user
+# Input fields for user
 input_data = {}
 col1, col2, col3 = st.columns(3)
 
@@ -53,7 +77,7 @@ with col1:
     input_data['no_of_weekend_nights'] = st.selectbox("Number of Weekend Nights", [0, 1, 2, 3, 4, 5, 6, 7])
     input_data['no_of_week_nights'] = st.selectbox("Number of Week Nights", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17])
     input_data['type_of_meal_plan'] = st.selectbox("Meal Plan", ['Not Selected', 'Meal Plan 1', 'Meal Plan 2', 'Meal Plan 3'])
-    input_data['required_car_parking_space'] = st.selectbox("Car Parking", ['No', 'Yes'])  # Changed to Yes/No
+    input_data['required_car_parking_space'] = st.selectbox("Car Parking", ['No', 'Yes'])  # Yes/No
 
 with col2:
     input_data['room_type_reserved'] = st.selectbox("Room Type", ['Room_Type 1', 'Room_Type 4', 'Room_Type 6', 'Room_Type 2', 'Room_Type 5', 'Room_Type 7', 'Room_Type 3'])
@@ -64,7 +88,7 @@ with col2:
     input_data['market_segment_type'] = st.selectbox("Market Segment", ['Online', 'Offline', 'Corporate', 'Complementary', 'Aviation'])
 
 with col3:
-    input_data['repeated_guest'] = st.selectbox("Repeated Guest", ['No', 'Yes'])  # Changed to Yes/No
+    input_data['repeated_guest'] = st.selectbox("Repeated Guest", ['No', 'Yes'])  # Yes/No
     input_data['no_of_previous_cancellations'] = st.selectbox("Previous Cancellations", [0, 1, 2, 3, 4, 5, 6, 11, 13])
     input_data['no_of_previous_bookings_not_canceled'] = st.selectbox("Previous Bookings Not Canceled", list(range(0, 58)))
     input_data['avg_price_per_room'] = st.number_input("Average Price per Room (EUR)", min_value=1.0, max_value=500.0)
@@ -75,26 +99,12 @@ if st.button("Predict Cancellation"):
     # Convert the input data to a pandas DataFrame
     input_df = pd.DataFrame([input_data])
 
-    # Apply the necessary preprocessing (like encoding categorical features)
-    try:
-        # Handle unseen labels and map them to default values
-        input_df['type_of_meal_plan'] = handle_unseen_label(encoders['type_of_meal_plan'], input_df['type_of_meal_plan'][0], 'Not Selected')
-        input_df['room_type_reserved'] = handle_unseen_label(encoders['room_type_reserved'], input_df['room_type_reserved'][0], 'Room_Type 1')
-        input_df['market_segment_type'] = handle_unseen_label(encoders['market_segment_type'], input_df['market_segment_type'][0], 'Online')
-        
-        # Convert 'Yes' and 'No' to 1 and 0 for 'required_car_parking_space' and 'repeated_guest'
-        input_df['required_car_parking_space'] = input_df['required_car_parking_space'].map({'No': 0, 'Yes': 1})
-        input_df['repeated_guest'] = input_df['repeated_guest'].map({'No': 0, 'Yes': 1})
-        
-    except KeyError as e:
-        st.error(f"Error during encoding: {e}")
-        st.stop()
-    except Exception as e:
-        st.error(f"Unexpected error during encoding: {e}")
-        st.stop()
+    # Preprocess the data using HotelBookingPreprocessor
+    preprocessor = HotelBookingPreprocessor(input_df)
+    X_input, _ = preprocessor.preprocess()  # Get features after preprocessing
 
     # Make prediction using the trained XGBoost model
-    prediction = model.predict(input_df)
+    prediction = model.predict(X_input)
 
     # Display the prediction result
     if prediction[0] == 1:
