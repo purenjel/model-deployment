@@ -36,9 +36,7 @@ class HotelBookingPreprocessor:
         self.df['market_segment_type'] = self.market_segment_encoder.fit_transform(self.df['market_segment_type'])
 
     def split_data(self):
-        """Split the data into features (X) and target (y), then into training and test sets."""
-        # No need for 'Booking_ID' or 'booking_status' in the inference phase
-        # 'Booking_ID' does not exist in the inference data, so it can be ignored during prediction
+        """Split the data into features (X) and target (y), but only return X for inference."""
         X = self.df.drop(columns=['booking_status'], errors='ignore')  # Ignore 'booking_status' if it doesn't exist
         return X
 
@@ -46,7 +44,7 @@ class HotelBookingPreprocessor:
         """Execute the full preprocessing pipeline."""
         self.fill_missing_values()
         self.encode_labels()
-        X = self.split_data()  # No target variable here, just the features
+        X = self.split_data()  # Only return features for inference, no target (y)
         return X
 
 
